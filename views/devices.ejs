@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartThings API App Test</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+    <script src="/javascript/device.js"></script>
+    <script src="/javascript/view-model.js"></script>
+    <script src="/javascript/initialize.js"></script>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1><%= locationName %></h1>
+        </div>
+        <div class="col-lg-12 ">
+            <a data-bind="click: allOn" class="control">All On</a>
+            <a data-bind="click: allOff" class="control">All Off</a>
+        </div>
+    </div>
+    <div class="row" data-bind="hidden: initialized">
+        <div class="col-lg-12">
+            <p>Loading switches from location <img src="/images/spinner.gif"></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <p class="errorMessage" data-bind="text: errorMessage"></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div data-bind="foreach: devices">
+                <div class="deviceTile" data-bind="click: toggleState">
+                      <span class="deviceControl" data-bind="class: tileState">
+                        <span class="deviceStatus" data-bind="text: switchState"></span>
+                      </span>
+                    <span class="displayName" data-bind="text: label"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <p><a href="/logout">Logout</a></p>
+        </div>
+    </div>
+</div>
+
+    <script>
+        (async function init() {
+            const cont = document.getElementById('container');
+            const response = await fetch('http://localhost:3000/fetch-data', {
+                method: "GET",
+                headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+                }
+            });
+            const jsonResponse = await response.json();
+            document.getElementById('dynamic').textContent = jsonResponse.data;
+        })();
+    </script>
+    <div class='container' id='container'>
+        <h1>Devices in the MONGODB</h1>
+        <span>TEST static data:  </span><h3 id="static">This is hard-coded</h3>
+        <hr />
+        <span>TEST Data from MongoDB:  </span><h3 id="dynamic"></h3>
+        <hr />
+    </div>
+
+</body>
+</html>

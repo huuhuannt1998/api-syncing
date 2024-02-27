@@ -1,0 +1,22 @@
+{
+    "appName": "sync_device_1.1",
+    "appType": "API_ONLY",
+    "classifications": [
+      "CONNECTED_SERVICE"
+    ],
+    "displayName": "Sync Devices",
+    "description": "Sync Devices",
+    "singleInstance": true,
+    "apiOnly": {
+      "targetUrl": "https://0411-2603-6080-f7f0-a3f0-f9d6-b7b6-762c-fde.ngrok-free.app"
+    },
+    "oauth": {
+      "clientName": "Sync Devices",
+      "scope": [
+        "r:locations:*",
+        "r:devices:*",
+        "x:devices:*"
+      ],
+      "redirectUris": ["https://0411-2603-6080-f7f0-a3f0-f9d6-b7b6-762c-fde.ngrok-free.app/oauth/callback"]
+    }
+  }
