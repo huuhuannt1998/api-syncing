@@ -52,25 +52,62 @@
     </div>
 </div>
 
-    <script>
-        (async function init() {
-            const cont = document.getElementById('container');
-            const response = await fetch('http://localhost:3000/fetch-data', {
-                method: "GET",
-                headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-                }
+<script>
+    (async function init() {
+        const cont = document.getElementById('container');
+        const response = await fetch('http://localhost:3000/fetch-data', {
+            method: "GET",
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+        });
+        const jsonResponse = await response.json();
+        document.getElementById('deviceID').textContent = jsonResponse.data;
+    })();
+</script>
+
+
+<script>
+    let data, response = "";
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/fetch-status')
+            .then(response => response.json())
+            .then(data => {
+                // Assuming the server responds with { status: "some_status" }
+                console.log("response: ",response)
+                document.getElementById('deviceStatus').textContent = `${data.status}`;
+            })
+            .catch(error => {
+                console.error('Error fetching device status:', error);
+                document.getElementById('deviceStatus').textContent = 'Failed to load device status.';
             });
-            const jsonResponse = await response.json();
-            document.getElementById('dynamic').textContent = jsonResponse.data;
-        })();
-    </script>
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/get-devices')
+          .then(response => response.json())
+          .then(devices => {
+              const container = document.getElementById('device-container');
+              devices.forEach(device => {
+                  const element = document.createElement('div');
+                  element.textContent = `${device.name}: ${device.status}`;
+                  container.appendChild(element);
+              });
+          })
+          .catch(error => console.error('Error:', error));
+    });
+  </script>
+
     <div class='container' id='container'>
-        <h1>Devices in the MONGODB</h1>
-        <span>TEST static data:  </span><h3 id="static">This is hard-coded</h3>
+        <h1>Devices and status from MongoDB</h1>
+        <span>TEST #:  </span><h3 id="static">2</h3>
         <hr />
-        <span>TEST Data from MongoDB:  </span><h3 id="dynamic"></h3>
+        <span>Device ID:  </span><h3 id="deviceID"></h3>
+        <hr />
+        <span>Device Status:  </span><h3 id="deviceStatus"></h3>
         <hr />
     </div>
 

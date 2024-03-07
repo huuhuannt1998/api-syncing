@@ -409,7 +409,7 @@ function isLoggedIn(req, res, next) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://0411-2603-6080-f7f0-a3f0-f9d6-b7b6-762c-fde.ngrok-free.app/oauth/login"
+    callbackURL: "https://98d6-2603-6080-f7f0-a3f0-f9d6-b7b6-762c-fde.ngrok-free.app/oauth/login"
   },
   function(accessToken, refreshToken, profile, done) {
     // Logic for user profile
@@ -468,24 +468,109 @@ let mongoClientOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 let databaseName = "my-db";
 let collectionName = "my-collection";
 
-server.get('/fetch-data', function (req, res) {
-  let response = {};
-  MongoClient.connect(mongoUrlDockerCompose, mongoClientOptions, function (err, client) {
-    if (err) throw err;
+// This works
+// app.get('/fetch-status', function (req, res) {
+//   let config = {
+//     method: 'get',
+//     maxBodyLength: Infinity,
+//     url: 'https://api.smartthings.com/v1/devices/89239dda-c3a9-4fc7-bcbc-ba1b028a29e8/status',
+//     headers: { 
+//       'Content-Type': 'application/json', 
+//       'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9'
+//     },
+//   };
 
-    let db = client.db(databaseName);
+//   axios.request(config)
+//   .then((apiResponse) => {
+//     const deviceStatus = apiResponse.data.components.main.switch.switch.value;
+//     res.send({ status: deviceStatus }); 
+//   })
+//   .catch((error) => {
+//     console.error(error);
+//     res.status(500).send({ error: "Failed to fetch device status" });
+//   });
+// });
 
-    let myquery = { deviceID: 1 };
+// Function to fetch status for a single device
+function fetchDeviceStatus(deviceId, headers) {
+	return axios.get(`https://api.smartthings.com/v1/devices/${deviceId}/status`, {headers});
+  }
+  
+server.get('/fetch-devices', async (req, res) => {
+let config = {
+	method: 'get',
+	url: 'https://api.smartthings.com/v1/devices',
+	headers: { 'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9' },
+};
 
-    db.collection(collectionName).findOne(myquery, function (err, result) {
-      if (err) throw err;
-      response = result;
-      client.close();
+try {
+	const devicesResponse = await axios.request(config);
+	const deviceStatusPromises = devicesResponse.data.items.map(device =>
+		fetchDeviceStatus(device.deviceId, config.headers).then(statusResponse => ({
+			deviceId: device.deviceId,
+			name: device.label || device.name,
+			status: statusResponse.data.components.main.switch.switch.value // Adjust according to the actual response structure
+		}))
+	);
+	const devicesWithStatus = await Promise.all(deviceStatusPromises);
+	res.json(devicesWithStatus);
+} catch (error) {
+	console.error(error);
+	res.status(500).send({ error: "Failed to fetch devices and statuses" });
+}
+});
 
-      // Send response
-      res.send(response ? response : {});
-    });
-  });
+
+
+server.get('/update-devices', async (req, res) => {
+MongoClient.connect(mongoUrlDockerCompose, mongoClientOptions, async (err, client) => {
+	if (err) {
+	console.error(err);
+	res.status(500).send("Failed to connect to MongoDB.");
+	return;
+	}
+	
+	const db = client.db(databaseName);
+	const collection = db.collection(collectionName);
+	
+	try {
+	const response = await axios.get('https://api.smartthings.com/v1/devices', {
+		headers: { 'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9' } // Make sure to use your actual token
+	});
+	const devices = response.data.items; // Assuming this is the correct path to the list of devices
+	
+	const updatePromises = devices.map(device => {
+		return fetchDeviceStatus(device.deviceId, response.config.headers)
+		.then(statusResponse => {
+			const status = statusResponse.data.components.main.switch.switch.value; // Make sure this path matches the actual response structure
+			return collection.updateOne(
+			{ deviceId: device.deviceId },
+			{ $set: { deviceId: device.deviceId, status: status } },
+			{ upsert: true }
+			);
+		});
+	});
+	
+	await Promise.all(updatePromises);
+	res.send('Devices updated');
+	} catch (error) {
+	console.error(error);
+	res.status(500).send("Failed to update devices.");
+	} finally {
+	client.close();
+	}
+});
+});
+
+
+server.get('/get-devices', async (req, res) => {
+try {
+	const devices = await db.collection('my-collection').find({}).toArray();
+	res.json(devices);
+} catch (error) {
+	console.error("Error accessing collection:", error);
+	res.status(500).send("Error fetching devices");
+}
 });
 
 
