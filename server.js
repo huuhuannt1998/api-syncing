@@ -19,6 +19,7 @@ const scope = encodeUrl('r:locations:* r:devices:* x:devices:*');
 
 const server = express();
 
+let db;
 // Google Oauth
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
@@ -494,35 +495,35 @@ let collectionName = "my-collection";
 // Function to fetch status for a single device
 function fetchDeviceStatus(deviceId, headers) {
 	return axios.get(`https://api.smartthings.com/v1/devices/${deviceId}/status`, {headers});
-  }
+}
   
 server.get('/fetch-devices', async (req, res) => {
-let config = {
-	method: 'get',
-	url: 'https://api.smartthings.com/v1/devices',
-	headers: { 'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9' },
-};
+	let config = {
+		method: 'get',
+		url: 'https://api.smartthings.com/v1/devices',
+		headers: { 'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9' },
+	};
 
-try {
-	const devicesResponse = await axios.request(config);
-	const deviceStatusPromises = devicesResponse.data.items.map(device =>
-		fetchDeviceStatus(device.deviceId, config.headers).then(statusResponse => ({
-			deviceId: device.deviceId,
-			name: device.label || device.name,
-			status: statusResponse.data.components.main.switch.switch.value // Adjust according to the actual response structure
-		}))
-	);
-	const devicesWithStatus = await Promise.all(deviceStatusPromises);
-	res.json(devicesWithStatus);
-} catch (error) {
-	console.error(error);
-	res.status(500).send({ error: "Failed to fetch devices and statuses" });
-}
+	try {
+		const devicesResponse = await axios.request(config);
+		const deviceStatusPromises = devicesResponse.data.items.map(device =>
+			fetchDeviceStatus(device.deviceId, config.headers).then(statusResponse => ({
+				deviceId: device.deviceId,
+				name: device.label || device.name,
+				status: statusResponse.data.components.main.switch.switch.value 
+			}))
+		);
+		const devicesWithStatus = await Promise.all(deviceStatusPromises);
+		res.json(devicesWithStatus);
+	} catch (error) {
+		console.error(error);
+		res.status(500).send({ error: "Failed to fetch devices and statuses" });
+	}
 });
 
 
 
-server.get('/update-devices', async (req, res) => {
+server.post('/update-devices', async (req, res) => {
 MongoClient.connect(mongoUrlDockerCompose, mongoClientOptions, async (err, client) => {
 	if (err) {
 	console.error(err);
@@ -535,14 +536,14 @@ MongoClient.connect(mongoUrlDockerCompose, mongoClientOptions, async (err, clien
 	
 	try {
 	const response = await axios.get('https://api.smartthings.com/v1/devices', {
-		headers: { 'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9' } // Make sure to use your actual token
+		headers: { 'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9' } 
 	});
-	const devices = response.data.items; // Assuming this is the correct path to the list of devices
+	const devices = response.data.items; 
 	
 	const updatePromises = devices.map(device => {
 		return fetchDeviceStatus(device.deviceId, response.config.headers)
 		.then(statusResponse => {
-			const status = statusResponse.data.components.main.switch.switch.value; // Make sure this path matches the actual response structure
+			const status = statusResponse.data.components.main.switch.switch.value;
 			return collection.updateOne(
 			{ deviceId: device.deviceId },
 			{ $set: { deviceId: device.deviceId, status: status } },
@@ -563,15 +564,165 @@ MongoClient.connect(mongoUrlDockerCompose, mongoClientOptions, async (err, clien
 });
 
 
-server.get('/get-devices', async (req, res) => {
-try {
-	const devices = await db.collection('my-collection').find({}).toArray();
-	res.json(devices);
-} catch (error) {
-	console.error("Error accessing collection:", error);
-	res.status(500).send("Error fetching devices");
-}
-});
+
+const mongoose = require('mongoose');
+const Device = require('./models/deviceModel')
+
+mongoose.connect('mongodb+srv://root:0000@shadowconn.xxbvupg.mongodb.net/my-collection?retryWrites=true&w=majority&appName=ShadowConn')
+.then(() => {
+	server.listen(port, () => {
+		console.log('Connect to port 3000')
+	});
+	console.log('Connected to MongoDB')
+}).catch((error) => {
+	console.log(error)
+}) 
+
+server.get('/devices', async (req, res) => {
+	try {
+		const devices = await Device.find({});
+		res.status(200).json(devices)
+	} catch (error) {
+		console.log(error.message);
+		res.status(500).json({message: error.message})
+	}
+})
+
+server.get('/devices/:id', async (req, res) => {
+	try {
+		const {id} = req.params;
+		const device = await Device.findById(id);
+
+		res.status(200).json(device)
+	} catch (error) {
+		console.log(error.message);
+		res.status(500).json({message: error.message})
+	}
+})
+
+// server.post('/device', async (req, res) => {
+// 	let deviceId = "";
+// 	let deviceName = "";
+// 	let deviceStatus = "";
+// 	try{
+
+// 		/**
+// 		 * device ID
+// 		 */
+
+// 		let data = 'commands: [{\n\t\tcomponent: "main",\n\t\tcapability: "switch",\n\t\tcommand: newState, \n\t\targuments: []\n\t  }]';
+// 		let config2 = {
+// 		method: 'get',
+// 		maxBodyLength: Infinity,
+// 		url: 'https://api.smartthings.com/v1/devices/',
+// 		headers: { 
+// 			'Content-Type': 'application/json', 
+// 			'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9'
+// 		},
+// 		data : data
+// 		};
+
+// 		axios.request(config2)
+// 		.then((response) => {
+// 			deviceId = response.data.items[2].deviceId;
+// 			deviceName = response.data.items[2].name;
+// 			// console.log("device ID: ", deviceId);
+// 			// console.log("device name: ", deviceName);
+// 		})
+// 		.catch((error) => {
+// 		console.log(error);
+// 		});
+
+
+// 		/**
+// 		 * device status
+// 		 */
+// 		let config = {
+// 			method: 'get',
+// 			maxBodyLength: Infinity,
+// 			url: 'https://api.smartthings.com/v1/devices/89239dda-c3a9-4fc7-bcbc-ba1b028a29e8/status',
+// 			headers: { 
+// 				'Content-Type': 'application/json', 
+// 				'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9'
+// 			},
+// 			};
+		
+// 			axios.request(config)
+// 			.then((apiResponse) => {
+// 				deviceStatus = apiResponse.data.components.main.switch.switch.value;
+// 				// console.log("deviceStatus: ", deviceStatus)
+// 			})
+// 			.catch((error) => {
+// 				console.error(error);
+// 				res.status(500).send({ error: "Failed to fetch device status" });
+// 		});
+// 		const { deviceId, deviceName, deviceStatus } = req.body;
+// 		const device = await Device.create({deviceId, deviceName, deviceStatus});
+
+// 		console.log("device ID: ", deviceId);
+// 		console.log("device name: ", deviceName);
+// 		console.log("deviceStatus: ", deviceStatus)
+// 		res.status(200).json(device)
+// 	} catch (error) {
+// 		console.log(error.message);
+// 		res.status(500).json({message: error.message})
+// 	}
+// })
+
+async function fetchAllDevicesFromSmartThings() {
+	try {
+	  const response = await axios.get('https://api.smartthings.com/v1/devices', {
+		headers: {
+		  'Authorization': `Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9`
+		}
+	  });
+	  return response.data.items;
+	} catch (error) {
+	  console.error('Error fetching devices from SmartThings:', error);
+	  throw new Error('Failed to fetch devices from SmartThings');
+	}
+  }
+  
+  async function fetchDeviceStatusFromSmartThings(deviceId) {
+	try {
+	  const response = await axios.get(`https://api.smartthings.com/v1/devices/${deviceId}/status`, {
+		headers: {
+		  'Authorization': `Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9`
+		}
+	  });
+	  const deviceStatus = response.data.components.main.switch.switch.value;
+	  return deviceStatus;
+	} catch (error) {
+	  console.error('Error fetching device status from SmartThings:', error);
+	  return 'unknown';
+	}
+  }
+  
+  server.post('/device', async (req, res) => {
+	try {
+	  const devices = await fetchAllDevicesFromSmartThings();
+	  const addedDevices = [];
+  
+	  for (const device of devices) {
+		const deviceId = device.deviceId; 
+		const deviceName = device.name; 
+		
+		// Fetch device status
+		const deviceStatus = await fetchDeviceStatusFromSmartThings(deviceId);
+  
+		// Create and save the new device
+		const newDevice = await Device.create({ deviceId, deviceName, deviceStatus });
+		addedDevices.push(newDevice);
+	  }
+  
+	  res.status(200).json(addedDevices); // Send back the list of added devices
+	} catch (error) {
+	  console.error(error);
+	  res.status(500).json({ message: "Failed to add devices" });
+	}
+  });
+  
+  
 
 
 /**
@@ -583,10 +734,10 @@ server.get('/events', sse.init);
  * Start the HTTP server and log URLs. Use the "open" URL for starting the OAuth process. Use the "callback"
  * URL in the API app definition using the SmartThings Developer Workspace.
  */
-server.listen(port);
-console.log(`\nTarget URL -- Copy this value into the targetUrl field of you app creation request:\n${serverUrl}\n`);
-console.log(`Redirect URI -- Copy this value into redirectUris field of your app creation request:\n${redirectUri}\n`);
-console.log(`Website URL -- Visit this URL in your browser to log into SmartThings and connect your account:\n${serverUrl}`);
+// server.listen(port);
+// console.log(`\nTarget URL -- Copy this value into the targetUrl field of you app creation request:\n${serverUrl}\n`);
+// console.log(`Redirect URI -- Copy this value into redirectUris field of your app creation request:\n${redirectUri}\n`);
+// console.log(`Website URL -- Visit this URL in your browser to log into SmartThings and connect your account:\n${serverUrl}`);
 
 
 
