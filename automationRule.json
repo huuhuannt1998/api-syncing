@@ -1,51 +1,72 @@
 {
-    "name": "Sync Real Switch to Virtual Switch",
-    "actions": [
-      {
-        "if": {
-          "equals": {
-            "left": {
-              "device": {
-                "deviceId": "a7940a66-f91c-4c51-a279-9d2a332fde91",
-                "component": "main",
-                "capability": "switch",
-                "attribute": "switch"
-              }
-            },
-            "right": {
-              "string": "on"
+  "name": "shadowConn",
+  "trigger": {
+    "src": {
+      "user": "U1",
+      "platform": ["Alexa", "Smartthings", "Google Home", "Apple HomeKit"],
+      "device": ""
+    },
+    "dst": {
+      "user": "U2",
+      "platform": ["Alexa", "Smartthings", "Google Home", "Apple HomeKit"],
+      "device": ""
+    }
+  },
+  "condition": {
+    "location": ["living room", "bedroom", "kitchen", "garage"],
+    "time": ""
+  },
+  "decision": {
+    "requester": "U2",
+    "approver": "U1",
+    "outcome": ["accept", "reject"]
+  },
+  "actions": [
+    {
+      "if": {
+        "decision": "accept",
+        "equals": {
+          "left": {
+            "device": {
+              "deviceId": "a7940a66-f91c-4c51-a279-9d2a332fde91",
+              "component": "main",
+              "capability": "switch",
+              "attribute": "switch"
             }
           },
-          "then": [
-            {
-              "command": {
-                "devices": ["a27770da-f4f9-48de-95cf-82948916b7f3"],
-                "commands": [
-                  {
-                    "component": "main",
-                    "capability": "switch",
-                    "command": "on"
-                  }
-                ]
-              }
+          "right": {
+            "string": "on"
+          }
+        },
+        "then": [
+          {
+            "command": {
+              "devices": ["a27770da-f4f9-48de-95cf-82948916b7f3"],
+              "commands": [
+                {
+                  "component": "main",
+                  "capability": "switch",
+                  "command": "on"
+                }
+              ]
             }
-          ],
-          "else": [
-            {
-              "command": {
-                "devices": ["a27770da-f4f9-48de-95cf-82948916b7f3"],
-                "commands": [
-                  {
-                    "component": "main",
-                    "capability": "switch",
-                    "command": "off"
-                  }
-                ]
-              }
+          }
+        ],
+        "else": [
+          {
+            "command": {
+              "devices": ["a27770da-f4f9-48de-95cf-82948916b7f3"],
+              "commands": [
+                {
+                  "component": "main",
+                  "capability": "switch",
+                  "command": "off"
+                }
+              ]
             }
-          ]
-        }
+          }
+        ]
       }
-    ]
-  }
-  
+    }
+  ]
+}
