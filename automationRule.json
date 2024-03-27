@@ -3,18 +3,18 @@
   "trigger": {
     "src": {
       "user": "U1",
-      "platform": ["Alexa", "Smartthings", "Google Home", "Apple HomeKit"],
+      "platform": ["Smartthings"],
       "device": ""
     },
     "dst": {
       "user": "U2",
-      "platform": ["Alexa", "Smartthings", "Google Home", "Apple HomeKit"],
+      "platform": ["Alexa"],
       "device": ""
     }
   },
   "condition": {
     "location": ["living room", "bedroom", "kitchen", "garage"],
-    "time": ""
+    "time": ["00:00x", ["day", "night"]]
   },
   "decision": {
     "requester": "U2",
