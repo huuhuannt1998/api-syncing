@@ -8,7 +8,6 @@ client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
 )
 
-# openai.api_key = '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'
 
 response = client.chat.completions.create(
   model="gpt-4-turbo-preview",
