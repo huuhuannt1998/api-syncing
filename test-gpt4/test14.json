@@ -1,0 +1,73 @@
+{
+    "name": "shadowConn",
+    "trigger": {
+      "src": {
+        "user": "U1",
+        "platform": ["Smartthings"],
+        "device": "smart oven"
+      },
+      "dst": {
+        "user": "U2",
+        "platform": ["Alexa"],
+        "device": "smart oven"
+      }
+    },
+    "condition": {
+      "location": ["kitchen"],
+      "time": ["07:30", "day"]
+    },
+    "decision": {
+      "requester": "U2",
+      "approver": "U1",
+      "outcome": ["accept"]
+    },
+    "actions": [
+      {
+        "if": {
+          "decision": "accept",
+          "equals": {
+            "left": {
+              "device": {
+                "deviceId": "",
+                "component": "main",
+                "capability": "smartOven",
+                "attribute": "smartOven"
+              }
+            },
+            "right": {
+              "string": "on" // Assuming the desired action is to turn the oven on or start preheating
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartOven",
+                    "command": "preheat", // Example command for starting the oven
+                    "arguments": ["350"] // Example argument, assuming 350 degrees Fahrenheit for preheating
+                  }
+                ]
+              }
+            }
+          ],
+          "else": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartOven",
+                    "command": "off" // Assuming the default or rejection state is to turn the oven off
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

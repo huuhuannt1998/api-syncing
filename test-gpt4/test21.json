@@ -1,0 +1,72 @@
+{
+    "name": "shadowConn",
+    "trigger": {
+      "src": {
+        "user": "U1",
+        "platform": ["Smartthings"],
+        "device": "smart irrigation system"
+      },
+      "dst": {
+        "user": "U2",
+        "platform": ["Alexa"],
+        "device": "smart irrigation system"
+      }
+    },
+    "condition": {
+      "location": ["garden"],
+      "time": ["14:30", "day"]
+    },
+    "decision": {
+      "requester": "U2",
+      "approver": "U1",
+      "outcome": ["reject"]
+    },
+    "actions": [
+      {
+        "if": {
+          "decision": "accept",
+          "equals": {
+            "left": {
+              "device": {
+                "deviceId": "",
+                "component": "main",
+                "capability": "smartIrrigationSystem",
+                "attribute": "smartIrrigationSystem"
+              }
+            },
+            "right": {
+              "string": "activate" // Assuming the desired action is to start watering
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartIrrigationSystem",
+                    "command": "startWatering" // Example command to start the irrigation system
+                  }
+                ]
+              }
+            }
+          ],
+          "else": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartIrrigationSystem",
+                    "command": "stopWatering" // Assuming the default or rejection state is to stop or not start watering
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

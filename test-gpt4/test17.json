@@ -1,0 +1,73 @@
+{
+    "name": "shadowConn",
+    "trigger": {
+      "src": {
+        "user": "U1",
+        "platform": ["Smartthings"],
+        "device": "smart alarm clock"
+      },
+      "dst": {
+        "user": "U2",
+        "platform": ["Alexa"],
+        "device": "smart alarm clock"
+      }
+    },
+    "condition": {
+      "location": ["bedroom"],
+      "time": ["06:00", "day"]
+    },
+    "decision": {
+      "requester": "U2",
+      "approver": "U1",
+      "outcome": ["reject"]
+    },
+    "actions": [
+      {
+        "if": {
+          "decision": "accept",
+          "equals": {
+            "left": {
+              "device": {
+                "deviceId": "",
+                "component": "main",
+                "capability": "smartAlarmClock",
+                "attribute": "smartAlarmClock"
+              }
+            },
+            "right": {
+              "string": "on" // Assuming the desired action is to set or turn on the alarm
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartAlarmClock",
+                    "command": "setAlarm",
+                    "arguments": ["06:00"] // Example argument, assuming setting the alarm for 6:00 AM
+                  }
+                ]
+              }
+            }
+          ],
+          "else": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartAlarmClock",
+                    "command": "off" // Assuming the default or rejection state is to keep the alarm off
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

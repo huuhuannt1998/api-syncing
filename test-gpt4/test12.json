@@ -1,0 +1,79 @@
+{
+    "name": "shadowConn",
+    "trigger": {
+      "src": {
+        "user": "U1",
+        "platform": ["Smartthings"],
+        "device": "smart lighting"
+      },
+      "dst": {
+        "user": "U2",
+        "platform": ["Alexa"],
+        "device": "smart lighting"
+      }
+    },
+    "condition": {
+      "location": ["living room"],
+      "time": ["20:00", "night"]
+    },
+    "decision": {
+      "requester": "U2",
+      "approver": "U1",
+      "outcome": ["accept"]
+    },
+    "actions": [
+      {
+        "if": {
+          "decision": "accept",
+          "equals": {
+            "left": {
+              "device": {
+                "deviceId": "",
+                "component": "main",
+                "capability": "smartLighting",
+                "attribute": "smartLighting"
+              }
+            },
+            "right": {
+              "string": "adjust" // Assuming 'adjust' involves changing brightness or color
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartLighting",
+                    "command": "setLevel", // Example command for adjusting brightness
+                    "arguments": ["75"] // Example argument, assuming 75% brightness
+                  },
+                  {
+                    "component": "main",
+                    "capability": "smartLighting",
+                    "command": "setColor", // Additional example command for adjusting color
+                    "arguments": ["warm"] // Example argument, assuming warm color
+                  }
+                ]
+              }
+            }
+          ],
+          "else": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartLighting",
+                    "command": "off" // Assuming the default or rejection state is to turn off
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

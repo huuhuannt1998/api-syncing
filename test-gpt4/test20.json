@@ -1,0 +1,72 @@
+{
+    "name": "shadowConn",
+    "trigger": {
+      "src": {
+        "user": "U1",
+        "platform": ["Smartthings"],
+        "device": "smart garage door opener"
+      },
+      "dst": {
+        "user": "U2",
+        "platform": ["Alexa"],
+        "device": "smart garage door opener"
+      }
+    },
+    "condition": {
+      "location": ["garage room"],
+      "time": ["20:30", "night"]
+    },
+    "decision": {
+      "requester": "U2",
+      "approver": "U1",
+      "outcome": ["accept"]
+    },
+    "actions": [
+      {
+        "if": {
+          "decision": "accept",
+          "equals": {
+            "left": {
+              "device": {
+                "deviceId": "",
+                "component": "main",
+                "capability": "smartGarageDoorOpener",
+                "attribute": "smartGarageDoorOpener"
+              }
+            },
+            "right": {
+              "string": "activate" // Assuming the desired action is to open the garage door
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartGarageDoorOpener",
+                    "command": "open" // Command to open the garage door
+                  }
+                ]
+              }
+            }
+          ],
+          "else": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartGarageDoorOpener",
+                    "command": "close" // Assuming the default or rejection state is to keep the garage door closed
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

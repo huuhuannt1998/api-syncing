@@ -1,0 +1,72 @@
+{
+    "name": "shadowConn",
+    "trigger": {
+      "src": {
+        "user": "U1",
+        "platform": ["Smartthings"],
+        "device": "smart air purifier"
+      },
+      "dst": {
+        "user": "U2",
+        "platform": ["Alexa"],
+        "device": "smart air purifier"
+      }
+    },
+    "condition": {
+      "location": ["living room"],
+      "time": ["12:00", "day"]
+    },
+    "decision": {
+      "requester": "U2",
+      "approver": "U1",
+      "outcome": ["reject"]
+    },
+    "actions": [
+      {
+        "if": {
+          "decision": "accept",
+          "equals": {
+            "left": {
+              "device": {
+                "deviceId": "",
+                "component": "main",
+                "capability": "smartAirPurifier",
+                "attribute": "smartAirPurifier"
+              }
+            },
+            "right": {
+              "string": "off"
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartAirPurifier",
+                    "command": "off"
+                  }
+                ]
+              }
+            }
+          ],
+          "else": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartAirPurifier",
+                    "command": "on" // Assuming the default or rejection state is to keep the purifier on
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }

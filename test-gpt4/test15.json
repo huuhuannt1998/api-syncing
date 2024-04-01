@@ -1,0 +1,74 @@
+{
+    "name": "shadowConn",
+    "trigger": {
+      "src": {
+        "user": "U1",
+        "platform": ["Smartthings"],
+        "device": "smart thermostat"
+      },
+      "dst": {
+        "user": "U2",
+        "platform": ["Alexa"],
+        "device": "smart thermostat"
+      }
+    },
+    "condition": {
+      "location": ["kitchen"],
+      "time": ["22:00", "night"]
+    },
+    "decision": {
+      "requester": "U2",
+      "approver": "U1",
+      "outcome": ["reject"]
+    },
+    "actions": [
+      {
+        "if": {
+          "decision": "accept",
+          "equals": {
+            "left": {
+              "device": {
+                "deviceId": "",
+                "component": "main",
+                "capability": "smartThermostat",
+                "attribute": "smartThermostat"
+              }
+            },
+            "right": {
+              "string": "adjust" // Assuming 'adjust' involves changing temperature
+            }
+          },
+          "then": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartThermostat",
+                    "command": "setTemperature", // Example command for adjusting temperature
+                    "arguments": ["68"] // Example argument, assuming 68 degrees Fahrenheit
+                  }
+                ]
+              }
+            }
+          ],
+          "else": [
+            {
+              "command": {
+                "devices": [""],
+                "commands": [
+                  {
+                    "component": "main",
+                    "capability": "smartThermostat",
+                    "command": "maintainTemperature", // Assuming the default or rejection state is to maintain current temperature
+                    "arguments": ["current"] // Placeholder argument, indicating to maintain the current setting
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
