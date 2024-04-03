@@ -14,7 +14,7 @@
   },
   "condition": {
     "location": ["living room", "bedroom", "kitchen", "garage"],
-    "time": ["00:00x", ["day", "night"]]
+    "time": ["00:00", ["day", "night"]]
   },
   "decision": {
     "requester": "U2",
