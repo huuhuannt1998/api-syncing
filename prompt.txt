@@ -1,30 +1,17 @@
-import os
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
-
-# Set OpenAI API key
-os.environ['OPENAI_API_KEY'] = "KEY"
-
-user_request = input("Enter your request: \n")
-
-prompt = ChatPromptTemplate.from_template(
-    """
-    I want to generate an access control policy as a json file. In this policy, U2 uses Alexa and U1 uses Smartthings. U2 sends a command to U1 to request the access to the smart device. The request looks like this \"U2 wants to turn on the switch in the living room in U1's account at 08:00, Day. U1 allows.\" and the json file looks like this:
+"""
+    I want to generate an access control policy as a json file from user request. In this policy, U2 uses Alexa and U1 uses Smartthings. U2 sends a command to U1 to request the access to the smart device. The request looks like this \"U2 wants to turn on the switch in the living room in U1's account at 08:00, Day. U1 allows.\" and the json file looks like this:
         {{
         "name": "shadowConn",
         "trigger": {{
             "src": {{
                 "user": "U1",
                 "platform": ["Smartthings"],
-                "device": "switch"
             }},
             "dst": {{
                 "user": "U2",
                 "platform": ["Alexa"],
-                "device": "switch"
-            }}
+            }},
+            "device_type": "switch"
         }},
         "condition": {{
             "location": ["living room"],
@@ -42,7 +29,7 @@ prompt = ChatPromptTemplate.from_template(
                     "equals": {{
                         "left": {{
                             "device": {{
-                                "deviceId": "",
+                                "deviceId1": "",
                                 "component": "main",
                                 "capability": "switch",
                                 "attribute": "switch"
@@ -55,7 +42,7 @@ prompt = ChatPromptTemplate.from_template(
                     "then": [
                         {{
                             "command": {{
-                                "devices": [""],
+                                "devicesId2": [""],
                                 "commands": [
                                     {{
                                         "component": "main",
@@ -69,7 +56,7 @@ prompt = ChatPromptTemplate.from_template(
                     "else": [
                         {{
                             "command": {{
-                                "devices": [""],
+                                "devicesId2": [""],
                                 "commands": [
                                     {{
                                         "component": "main",
@@ -85,20 +72,5 @@ prompt = ChatPromptTemplate.from_template(
         ]
         }}
 
-    Use this {topic} to create the JSON file. No extra explanation needed. Do not change the decision value in the if statement.
+    Use this {request} to create the JSON file. No extra explanation needed. Do not change the decision value in the if statement. If there is missing information, ask user to input the missing information. The outcome of the decision will be accept or decline.
     """
-)
-
-output_parser = StrOutputParser()
-model = ChatOpenAI(model="gpt-4-turbo-preview")
-
-chain = (
-    {"topic": RunnablePassthrough()} 
-    | prompt
-    | model
-    | output_parser
-)
-
-result = chain.invoke(user_request)
-
-print(result)
