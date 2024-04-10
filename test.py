@@ -14,7 +14,7 @@ comics = [
     'issue': 753,
     'released': datetime.date(2020, 5, 5)
   },
-  {
+  { 
     'title': 'Captain Marvel',
     'publisher': 'Marvel',
     'issue': 18,
