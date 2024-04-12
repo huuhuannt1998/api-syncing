@@ -103,7 +103,7 @@ actions = json_string['actions']
 
 then_commands = actions[0]['if']['then']
 
-commands = then_commands[0]['command']
+commands = then_commands[0]['command']['commands']
 
 print("Command: ", commands)
 
@@ -125,14 +125,15 @@ print("Status before: ", fetch_device_status_from_smartthings(devices_id2))
 
 
 
-url = "https://api.smartthings.com/v1/devices/a7940a66-f91c-4c51-a279-9d2a332fde91/commands"
+url = "https://api.smartthings.com/v1/devices/" + devices_id2 + "/commands"
 
-payload = "{\n  \"commands\": [\n    {\n      \"component\": \"main\",\n      \"capability\": \"switch\",\n      \"command\": \"on\"\n    }\n  ]\n}"
+payload = "{\n  \"commands\": " + str(commands) + "}"
 headers = {
   'Content-Type': 'text/plain',
   'Authorization': 'Bearer 64988233-33ea-4dee-9e8a-d042a10ed6f9'
 }
 
+# print(payload)
 response = requests.request("POST", url, headers=headers, data=payload)
 
 print(response.text)
