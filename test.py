@@ -1,8 +1,6 @@
 import rule_engine
 import requests
 import json
-import aiohttp
-import asyncio
 
 
 rule = rule_engine.Rule(
