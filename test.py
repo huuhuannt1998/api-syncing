@@ -2,7 +2,6 @@ import rule_engine
 import requests
 import json
 
-
 rule = rule_engine.Rule(
     'decision.outcome == "accept"'
 )
@@ -116,8 +115,6 @@ devices_id2 = command_section['devicesId2']
 # Print the 'devicesId2'
 print("devices_id2: ", devices_id2)
 
-# if result:
-#     print(result)
 
 print("Status before: ", fetch_device_status_from_smartthings(devices_id2))
 
