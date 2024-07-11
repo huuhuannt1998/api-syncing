@@ -1,0 +1,104 @@
+import os
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+from time import time
+
+# Set OpenAI API key
+os.environ['OPENAI_API_KEY'] = "KEY"
+
+
+prompt = ChatPromptTemplate.from_template(
+    """
+    I want to generate an access control policy as a json file from user request. The json file looks like this:
+        {{
+        "trigger": {{
+            "src": {{
+                "user1": "U1",
+                "platform": "Smartthings",
+            }},
+            "dst": {{
+                "user": "U2",
+                "platform": "Alexa",
+            }},
+            "device_type": ""
+        }},
+        "condition": {{
+            "location": [""],
+            "time": ["00:00", ["day", "night"]]
+        }},
+        "decision": {{
+            "requester": "",
+            "approver": "",
+            "outcome": ["accept", "decline"]
+        }},
+        "actions": [
+            {{
+                "if": {{
+                    "decision": "accept",
+                    "equals": {{
+                        "left": {{
+                            "device": {{
+                                "deviceId1": "",
+                                "component": "main",
+                                "capability": "switch",
+                                "attribute": "switch"
+                            }}
+                        }},
+                        "right": {{
+                            "string": "on"
+                        }}
+                    }},
+                    "then": [
+                        {{
+                            "command": {{
+                                "devicesId2": "",
+                                "commands": [
+                                    {{
+                                        "component": "main",
+                                        "capability": "switch",
+                                        "command": "on"
+                                    }}
+                                ]
+                            }}
+                        }}
+                    ],
+                    "else": [
+                        {{
+                            "command": {{
+                                "devicesId2": "",
+                                "commands": [
+                                    {{
+                                        "component": "main",
+                                        "capability": "switch",
+                                        "command": "off"
+                                    }}
+                                ]
+                            }}
+                        }}
+                    ]
+                }}
+            }}
+        ]
+        }}
+
+    Use this {request} to create the JSON file. No extra explanation needed. User needs to specify the time.
+    The device type is the device that is requested. 
+    Requester is the user in the dst, and receiver is the user is in the src. 
+    Do not change the decision value in the if statement and do not skip the action part. 
+    If there is missing information, keep asking user to input the missing information. 
+    The outcome of the decision will be accept or decline.
+    """
+)
+
+
+output_parser = StrOutputParser()
+model = ChatOpenAI(model="gpt-4-turbo-preview")
+
+chain = (
+    {"request": RunnablePassthrough()} 
+    | prompt
+    | model
+    | output_parser
+)

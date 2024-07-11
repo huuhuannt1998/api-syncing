@@ -1,0 +1,4 @@
+trigger_src_user1,trigger_src_platform,trigger_dst_user2,trigger_dst_platform,trigger_device_type,condition_location,condition_time,decision_requester,decision_approver,decision_outcome,if_decision,if_equals_left_deviceId1,if_equals_right_string,then_command_deviceId2,then_command,else_command_deviceId2,else_command
+U1,SmartThings,U2,Alexa,switch,living room,08:00,U2,U1,accept,accept,device_id1,on,device_id2,on,device_id2,off
+U1,SmartThings,U2,Alexa,switch,living room,08:00,U2,U1,accept,accept,st_dv1,on,st_dv2,on,st_dv2,off
+U1,SmartThings,U2,Alexa,switch,living room,10:00,U2,U1,accept,accept,st_dv1,on,st_dv2,on,st_dv2,off
