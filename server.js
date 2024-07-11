@@ -410,7 +410,7 @@ function isLoggedIn(req, res, next) {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://98d6-2603-6080-f7f0-a3f0-f9d6-b7b6-762c-fde.ngrok-free.app/oauth/login"
+    callbackURL: "https://8aa1-152-15-112-69.ngrok-free.app/oauth/login"
   },
   function(accessToken, refreshToken, profile, done) {
     // Logic for user profile
